@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
+import org.photonvision.targeting.PhotonPipelineResult;
 //PHOTONVISION IMPORTS
 import org.photonvision.targeting.PhotonTrackedTarget;
 import org.photonvision.*;

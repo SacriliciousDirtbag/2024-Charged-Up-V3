@@ -2,6 +2,7 @@ package frc.robot.commands;
 
 
 
+import edu.wpi.first.wpilibj2.command.Command;
 //import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.State.FState;
@@ -16,7 +17,7 @@ import frc.robot.subsystems.IntakeSubsystem;
 //import java.util.function.DoubleSupplier;
 //import edu.wpi.first.wpilibj.Timer; Needs Implementation
 
-public class CentralCommand extends CommandBase {
+public class CentralCommand extends Command {
   //@SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
 
    

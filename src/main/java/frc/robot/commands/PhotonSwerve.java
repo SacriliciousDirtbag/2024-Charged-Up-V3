@@ -1,13 +1,15 @@
-import edu.wpi.first.wpilibj2.command.CommandBase;
+package frc.robot.commands;
 
-public class PhotonSwerve extends CommandBase{
+import edu.wpi.first.wpilibj2.command.Command;
+
+public class PhotonSwerve extends Command{
     public PhotonSwerve() 
     {
 
     }
 
     @Override
-    public void intalize() 
+    public void initialize() 
     {
 
     }
@@ -24,9 +26,4 @@ public class PhotonSwerve extends CommandBase{
 
     }
 
-    @Override
-    public boolean finished()
-    {
-        return false;
-    }
 }
