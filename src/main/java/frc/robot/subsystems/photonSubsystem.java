@@ -33,8 +33,7 @@ public class photonSubsystem extends SubsystemBase{
   ArrayList<PhotonTrackedTarget> targets;
 
 
-
-   
+  
     public photonSubsystem(){
       camera = new PhotonCamera("photoncamera1");
       //var result = camera.getLatestResult();

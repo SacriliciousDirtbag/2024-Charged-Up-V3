@@ -1,5 +1,6 @@
 package frc.robot;
 
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 
@@ -48,7 +49,6 @@ public class RobotContainer {
     public final Joystick buttonBoard2 = new Joystick(2); //External Driver 2
 
 
-    cameraSubsystem camera = new cameraSubsystem();
     /* Drive Controls */
     //private final int translationAxis = XboxController.Axis.kLeftY.value;
     //private final int strafeAxis = XboxController.Axis.kLeftX.value;
@@ -151,6 +151,9 @@ public class RobotContainer {
     public final IntakeSubsystem s_IntakeSubsystem = new IntakeSubsystem();
     public final LEDSubsystem s_lightSubsystem = new LEDSubsystem();
 
+    //PHOTON
+    public final photonSubsystem s_PhotonSubsystem = new photonSubsystem();
+
     public final Command m_leftCommand = new left(s_Swerve);
     public final Command m_middleCommand = new middle(s_Swerve);
     public final Command m_rightCommand = new right(s_Swerve);
@@ -158,7 +161,9 @@ public class RobotContainer {
     
 
     //PHOTON COMMAND
-    public final Command m_photonCommand = new PhotonSwerve(null, null, null, null);
+    PIDController pid = new PIDController(Constants.AutoConstants.kPXController, Constants.AutoConstants.kPYController, Constants.AutoConstants.kPThetaController);
+
+    public final Command m_photonCommand = new PhotonSwerve(pid, s_PhotonSubsystem, null, null);
 
     
     public final Command s_AutoBalance = new NewAutoBalance(s_Swerve);
