@@ -8,6 +8,7 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 import org.photonvision.*;
 
 
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 
 public class photonSubsystem extends SubsystemBase{
   PhotonCamera camera;
+  PhotonPipelineResult result;
   Transform3d pose;
 
 
@@ -57,5 +59,14 @@ public class photonSubsystem extends SubsystemBase{
     }
 
   }
-  
+
+  public double getRotation()
+  {
+    
+  }
+
+  public double getDistance()
+  {
+
+  }
 }

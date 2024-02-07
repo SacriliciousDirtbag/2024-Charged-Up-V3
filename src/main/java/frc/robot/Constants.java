@@ -225,5 +225,13 @@ public final class Constants {
         public static final Translation2d[] route3Locations = {new Translation2d(2.5, 0.15), new Translation2d(2.6, 0.1), new Translation2d(2.6, 1), new Translation2d(2.6, 2)};
         public static final Pose2d route3EndLocation = new Pose2d(0.3, 2, Rotation2d.fromDegrees(0));
     }
+
+    public static final class cameraSettings
+    {
+        public static final double cameraHeight = Units.inchesToMeters(20.25);
+        public static final double targetHeight1 = Units.inchesToMeters(43);
+        public static final double cameraPitchRadians = Units.degreesToRadians(0);
+    }
+
 }
 
