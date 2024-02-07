@@ -28,6 +28,7 @@ import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.Swerve;
 import frc.robot.subsystems.cameraSubsystem;
+import frc.robot.subsystems.photonSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
 import frc.robot.subsystems.cameraSubsystem;
 
@@ -88,6 +89,8 @@ public class RobotContainer {
     // LOGITECH PRO - FLIGHTSTICK //
 
     //DRIVE
+    private final JoystickButton photonToggle = new JoystickButton(driver, XboxController.Button.kRightBumper.value); //TODO: Implement As Button
+
     
     private final JoystickButton zeroGyro = new JoystickButton(driver, 4); //TODO: Implement As Button
     private final JoystickButton robotCentric = new JoystickButton(driver2, XboxController.Button.kLeftBumper.value);
@@ -153,6 +156,9 @@ public class RobotContainer {
     public final Command m_rightCommand = new right(s_Swerve);
     public final SequentialCommandGroup m_ballAuto = new swerveDriveDrive(s_Swerve, s_ElevatorSubsystem, s_IntakeSubsystem);
     
+
+    //PHOTON COMMAND
+    public final Command m_photonCommand = new PhotonSwerve(null, null, null, null);
 
     
     public final Command s_AutoBalance = new NewAutoBalance(s_Swerve);
@@ -287,6 +293,8 @@ public class RobotContainer {
      */
     private void configureButtonBindings() {
         /* Driver Buttons */
+
+        photonToggle.onTrue(m_photonCommand);
 
         //M_ELEVATOR_EXTEND_BUTTON = ()-> driver.getRawButton(3);
         //M_ELEVATOR_RETRACT_BUTTON = ()-> driver.getRawButton(2);
