@@ -160,10 +160,11 @@ public class RobotContainer {
     public final SequentialCommandGroup m_ballAuto = new swerveDriveDrive(s_Swerve, s_ElevatorSubsystem, s_IntakeSubsystem);
     
 
-    //PHOTON COMMAND
-    PIDController pid = new PIDController(Constants.AutoConstants.kPXController, Constants.AutoConstants.kPYController, Constants.AutoConstants.kPThetaController);
+ //PHOTON COMMAND
+    PIDController phController = new PIDController(Constants.AutoConstants.kPXController, Constants.AutoConstants.kPYController, Constants.AutoConstants.kPThetaController);
+    
 
-    public final Command m_photonCommand = new PhotonSwerve(pid, s_PhotonSubsystem, null, null);
+    public final Command m_photonCommand = new PhotonSwerve(phController, s_PhotonSubsystem);
 
     
     public final Command s_AutoBalance = new NewAutoBalance(s_Swerve);

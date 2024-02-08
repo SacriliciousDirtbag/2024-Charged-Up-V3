@@ -20,18 +20,23 @@ public class PhotonSwerve extends Command{
     photonSubsystem camera;
     SwerveModule[] swerveModules = new SwerveModule[4];
 
+    SwerveModule[] frontModules = new SwerveModule[2];
+    SwerveModule[] backModules = new SwerveModule[2];
+
+    PIDController pid = new PIDController(Constants.AutoConstants.kPXController, Constants.AutoConstants.kPYController, Constants.AutoConstants.kPThetaController);
+    
+
     double currentPosition;
     double currentAngle;
 
-    public PhotonSwerve(PIDController movementController, photonSubsystem camera, SwerveModule[] frontModules,
-    SwerveModule[] backModules) 
+    public PhotonSwerve(PIDController movementController, photonSubsystem camera)  //, SwerveModule[] frontModules, SwerveModule[] backModules
     {
         this.movementController = movementController;
         this.camera = camera;
         for(int i = 0; i < frontModules.length; i++)
         {
-            swerveModules[i] = frontModules[i];
-            swerveModules[i+2] = backModules[i];
+            frontModules[i] = swerveModules[i] ; // every odd
+            backModules[i] = swerveModules[i+2]; // every 
         }
     }
 
