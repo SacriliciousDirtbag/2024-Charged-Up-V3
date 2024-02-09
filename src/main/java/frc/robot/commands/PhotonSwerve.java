@@ -2,11 +2,14 @@ package frc.robot.commands;
 
 import java.util.ArrayList;
 
+import com.fasterxml.jackson.core.TreeNode;
+
 import frc.robot.Constants;
 import frc.robot.SwerveModule;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
@@ -28,67 +31,78 @@ public class PhotonSwerve extends Command{
 
     double currentPosition;
     double currentAngle;
+    Swerve s_Swerve;
+    Translation2d translation; 
 
-    public PhotonSwerve(PIDController movementController, photonSubsystem camera)  //, SwerveModule[] frontModules, SwerveModule[] backModules
+    public PhotonSwerve(photonSubsystem camera, Swerve s_Swerve)  //, SwerveModule[] frontModules, SwerveModule[] backModules
     {
-        this.movementController = movementController;
+        // this.movementController = movementController;
         this.camera = camera;
-        for(int i = 0; i < frontModules.length; i++)
-        {
-            frontModules[i] = swerveModules[i] ; // every odd
-            backModules[i] = swerveModules[i+2]; // every 
-        }
+        this.s_Swerve = s_Swerve;
+        // for(int i = 0; i < frontModules.length; i++)
+        // {
+        //     frontModules[i] = swerveModules[i] ; // every odd
+        //     backModules[i] = swerveModules[i+2]; // every 
+        // }
     }
 
     @Override
     public void initialize() 
     {
-        movementController.setSetpoint(0);
-        movementController.setTolerance(0.5);
-        currentAngle = 0;
+        // movementController.setSetpoint(0);
+        // movementController.setTolerance(0.5);
+        // currentAngle = 0;
+        currentAngle = camera.getYaw();
+        currentPosition = camera.getDistance();
+        translation = new Translation2d(currentPosition, new Rotation2d(Units.degreesToRadians(currentAngle)));
     }
 
     @Override 
     public void execute()
     {
-        currentAngle = -1 * (currentAngle - camera.getYaw());
+        s_Swerve.drive(translation, currentAngle, false,false);
+        currentAngle = currentAngle - camera.getYaw();
         currentPosition = camera.getDistance();
-
-        movementController.calculate(currentPosition);
-        SwerveModuleState[] mo = {new SwerveModuleState(movementController.calculate(currentPosition),new Rotation2d(Units.degreesToRadians(currentAngle)))};
-
-        SwerveDriveKinematics.desaturateWheelSpeeds(mo, Constants.Swerve.maxSpeed);
+        translation = new Translation2d(currentPosition, new Rotation2d(Units.degreesToRadians(currentAngle)));
     
-        int counter = 0; 
-        for(SwerveModule i : swerveModules)
-        {
-            if(counter == 2)
-            {
-                mo[0] = new SwerveModuleState(
-                    movementController.calculate(currentPosition), new Rotation2d(Units.degreesToRadians((currentAngle * 3) % 360)));
-            }
-            i.setDesiredState(mo[0], false);
-        }
+        // currentAngle = -1 * (currentAngle - camera.getYaw());
+        // currentPosition = camera.getDistance();
+
+        // movementController.calculate(currentPosition);
+        // SwerveModuleState[] mo = {new SwerveModuleState(movementController.calculate(currentPosition),new Rotation2d(Units.degreesToRadians(currentAngle)))};
+
+        // SwerveDriveKinematics.desaturateWheelSpeeds(mo, Constants.Swerve.maxSpeed);
+    
+        // int counter = 0; 
+        // for(SwerveModule i : swerveModules)
+        // {
+        //     if(counter == 2)
+        //     {
+        //         mo[0] = new SwerveModuleState(
+        //             movementController.calculate(currentPosition), new Rotation2d(Units.degreesToRadians((currentAngle * 3) % 360)));
+        //     }
+        //     i.setDesiredState(mo[0], false);
+        // }
     }
 
-    @Override
-    public void end(boolean isTrue)
-    {
-        SwerveModuleState stop = new SwerveModuleState();
+    // @Override
+    // public void end(boolean isTrue)
+    // {
+    //     SwerveModuleState stop = new SwerveModuleState();
 
-        for(SwerveModule i : swerveModules)
-        {
-            i.setDesiredState(stop, false);
-        }
-    }
+    //     for(SwerveModule i : swerveModules)
+    //     {
+    //         i.setDesiredState(stop, false);
+    //     }
+    // }
 
-    @Override
-    public boolean isFinished()
-    {
-        if(movementController.atSetpoint() && currentAngle < -0.5 && currentAngle > 0.5)
-        {
-            return true;
-        }
-        return false;
-    }
+    // @Override
+    // public boolean isFinished()
+    // {
+    //     if(movementController.atSetpoint() && currentAngle < -0.5 && currentAngle > 0.5)
+    //     {
+    //         return true;
+    //     }
+    //     return false;
+    // }
 }

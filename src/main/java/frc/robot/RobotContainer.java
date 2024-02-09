@@ -89,7 +89,7 @@ public class RobotContainer {
     // LOGITECH PRO - FLIGHTSTICK //
 
     //DRIVE
-    private final JoystickButton photonToggle = new JoystickButton(driver, XboxController.Button.kRightBumper.value); //TODO: Implement As Button
+    private final JoystickButton photonToggle = new JoystickButton(driver, XboxController.Button.kA.value); //TODO: Implement As Button
 
     
     private final JoystickButton zeroGyro = new JoystickButton(driver, 4); //TODO: Implement As Button
@@ -164,7 +164,7 @@ public class RobotContainer {
     PIDController phController = new PIDController(Constants.AutoConstants.kPXController, Constants.AutoConstants.kPYController, Constants.AutoConstants.kPThetaController);
     
 
-    public final Command m_photonCommand = new PhotonSwerve(phController, s_PhotonSubsystem);
+    public final Command m_photonCommand = new PhotonSwerve(s_PhotonSubsystem, s_Swerve);
 
     
     public final Command s_AutoBalance = new NewAutoBalance(s_Swerve);
@@ -300,7 +300,7 @@ public class RobotContainer {
     private void configureButtonBindings() {
         /* Driver Buttons */
 
-        photonToggle.onTrue(m_photonCommand);
+        photonToggle.toggleOnTrue(m_photonCommand);
 
         //M_ELEVATOR_EXTEND_BUTTON = ()-> driver.getRawButton(3);
         //M_ELEVATOR_RETRACT_BUTTON = ()-> driver.getRawButton(2);
