@@ -152,7 +152,7 @@ public class RobotContainer {
     public final LEDSubsystem s_lightSubsystem = new LEDSubsystem();
 
     //PHOTON
-    public final photonSubsystem s_PhotonSubsystem = new photonSubsystem();
+    public final photonSubsystem s_PhotonSubsystem = new photonSubsystem(null, s_Swerve); //TODO: Finish
 
     public final Command m_leftCommand = new left(s_Swerve);
     public final Command m_middleCommand = new middle(s_Swerve);
