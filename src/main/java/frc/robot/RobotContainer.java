@@ -1,6 +1,7 @@
 package frc.robot;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 
@@ -152,7 +153,7 @@ public class RobotContainer {
     public final LEDSubsystem s_lightSubsystem = new LEDSubsystem();
 
     //PHOTON
-    public final photonSubsystem s_PhotonSubsystem = new photonSubsystem(null, s_Swerve); //TODO: Finish
+    public final photonSubsystem s_PhotonSubsystem = new photonSubsystem(); //TODO: Finish
 
     public final Command m_leftCommand = new left(s_Swerve);
     public final Command m_middleCommand = new middle(s_Swerve);
@@ -163,8 +164,6 @@ public class RobotContainer {
  //PHOTON COMMAND
     PIDController phController = new PIDController(Constants.AutoConstants.kPXController, Constants.AutoConstants.kPYController, Constants.AutoConstants.kPThetaController);
     
-
-    public final Command m_photonCommand = new PhotonSwerve(s_PhotonSubsystem, s_Swerve);
 
     
     public final Command s_AutoBalance = new NewAutoBalance(s_Swerve);
@@ -180,7 +179,8 @@ public class RobotContainer {
     );
 
    
- 
+    public final PhotonSwerve m_photonCommand = new PhotonSwerve(s_PhotonSubsystem, s_Swerve);
+
 
     public final IntakeCone s_IntakeCone = new IntakeCone(s_ElevatorSubsystem, s_IntakeSubsystem);
     public final IntakeCube s_IntakeCube = new IntakeCube(s_ElevatorSubsystem, s_IntakeSubsystem);
@@ -300,7 +300,8 @@ public class RobotContainer {
     private void configureButtonBindings() {
         /* Driver Buttons */
 
-        photonToggle.toggleOnTrue(m_photonCommand);
+        photonToggle.onTrue(m_photonCommand);
+        photonToggle.onFalse(new InstantCommand(() -> s_Swerve.drive(new Translation2d(), 0,false, false)));
 
         //M_ELEVATOR_EXTEND_BUTTON = ()-> driver.getRawButton(3);
         //M_ELEVATOR_RETRACT_BUTTON = ()-> driver.getRawButton(2);
@@ -308,7 +309,7 @@ public class RobotContainer {
         //accumulatorIn.onTrue(new InstantCommand(() -> CentralCommand.getAsBooleanFalse()));
         //accumulatorOut.onTrue(new InstantCommand(() -> CentralCommand.getAsBooleanTrue()));
         
-        //zeroGyro.onTrue(new InstantCommand(() -> s_Swerve.zeroGyro()));
+        zeroGyro.onTrue(new InstantCommand(() -> s_Swerve.zeroGyro()));
 
        //elevatorUpButton.onTrue(new InstantCommand(() -> s_ElevatorSubsystem.raiseArm()));
 

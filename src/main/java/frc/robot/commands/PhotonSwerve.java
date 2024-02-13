@@ -13,6 +13,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Swerve;
 import frc.robot.subsystems.photonSubsystem;
@@ -36,13 +37,13 @@ public class PhotonSwerve extends Command{
 
     public PhotonSwerve(photonSubsystem camera, Swerve s_Swerve)  //, SwerveModule[] frontModules, SwerveModule[] backModules
     {
-        // this.movementController = movementController;
+        //this.movementController = movementController;
         this.camera = camera;
         this.s_Swerve = s_Swerve;
         // for(int i = 0; i < frontModules.length; i++)
         // {
         //     frontModules[i] = swerveModules[i] ; // every odd
-        //     backModules[i] = swerveModules[i+2]; // every 
+        //     backModules[i] = swerveModules[i+1]; // every 
         // }
     }
 
@@ -51,10 +52,9 @@ public class PhotonSwerve extends Command{
     {
         // movementController.setSetpoint(0);
         // movementController.setTolerance(0.5);
-        // currentAngle = 0;
         currentAngle = camera.getYaw();
         currentPosition = camera.getDistance();
-        translation = new Translation2d(currentPosition, new Rotation2d(Units.degreesToRadians(currentAngle)));
+        translation = new Translation2d(-currentPosition, new Rotation2d(Units.degreesToRadians(currentAngle)));
     }
 
     @Override 
@@ -63,9 +63,9 @@ public class PhotonSwerve extends Command{
         s_Swerve.drive(translation, 0, false,false);
         currentAngle = currentAngle - camera.getYaw();
         currentPosition = camera.getDistance();
-        translation = new Translation2d(currentPosition, new Rotation2d(Units.degreesToRadians(currentAngle)));
+        translation = new Translation2d(-currentPosition, new Rotation2d(Units.degreesToRadians(currentAngle)));
     
-        // currentAngle = -1 * (currentAngle - camera.getYaw());
+        // currentAngle = -1 * (currentAngle - camera.getYaw());                                               
         // currentPosition = camera.getDistance();
 
         // movementController.calculate(currentPosition);
@@ -99,10 +99,10 @@ public class PhotonSwerve extends Command{
     // @Override
     // public boolean isFinished()
     // {
-    //     if(movementController.atSetpoint() && currentAngle < -0.5 && currentAngle > 0.5)
-    //     {
-    //         return true;
-    //     }
-    //     return false;
+    //     // if(movementController.atSetpoint() && currentAngle < -0.5 && currentAngle > 0.5)
+    //     // {
+    //     //     return true;
+    //     // }
+    //     // return false;
     // }
 }

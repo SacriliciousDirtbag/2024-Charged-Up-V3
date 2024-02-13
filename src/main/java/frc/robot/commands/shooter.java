@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.commands.IntakeCone;
@@ -20,7 +21,7 @@ import frc.robot.subsystems.LEDSubsystem;
 
 import edu.wpi.first.wpilibj.Timer;
 
-public class shooter extends CommandBase {
+public class shooter extends Command {
     Swerve s_Swerve;
     ElevatorSubsystem s_ElevatorSubsystem;
     IntakeSubsystem s_IntakeSubsystem;

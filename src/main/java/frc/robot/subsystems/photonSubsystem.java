@@ -35,96 +35,52 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 
 public class photonSubsystem extends SubsystemBase{
   PhotonCamera camera;
-  Swerve s_Swerve;
-  PhotonPipelineResult result; 
-  Transform3d pose;
-  double range; 
-  AprilTagFieldLayout aprilTagFieldLayout;
-  ArrayList<PhotonTrackedTarget> targets;
-
-
-
- /**
-   * Standard deviations of model states. Increase these numbers to trust your model's state estimates less. This
-   * matrix is in the form [x, y, theta]ᵀ, with units in meters and radians, then meters.
-   */
-  private static final Vector<N3> stateStdDevs = VecBuilder.fill(0.05, 0.05, Units.degreesToRadians(5));
+  PhotonPipelineResult lf; //latest frame
+  PhotonTrackedTarget ct; //current target
+  Transform3d pti; //idk what this is arlen
+  final double chog = Units.inchesToMeters(20.25); //camera height off ground
+  final double thog = Units.inchesToMeters(34); //target height off ground
+  final double cpr = 0; //camera pitch radians
+  double distance;
   
+  public photonSubsystem()
+  {
+    camera = new PhotonCamera( "PhotonCamera1");
 
-  private static final Vector<N3> visionMeasurementStdDevs = VecBuilder.fill(0.5, 0.5, Units.degreesToRadians(10));
+  }
 
-  private SwerveDrivePoseEstimator poseEstimator;
-
-  private final Field2d field2d = new Field2d();
-
-  private double previousPipelineTimestamp = 0;
-  
-    public photonSubsystem(PhotonCamera photonCamera, Swerve s_Swerve){
-      this.camera = photonCamera;
-      this.s_Swerve = s_Swerve;
-      AprilTagFieldLayout layout;
-      try{
-        layout = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2024Crescendo.m_resourceFile);
-        var alliance = DriverStation.getAlliance();
-        //sets field to resource
-        this.aprilTagFieldLayout = layout;
-      } catch(IOException e){
-        DriverStation.reportError("Failed to load AprilTagFieldLayout", e.getStackTrace());
-      }
-      
-
-      poseEstimator = new SwerveDrivePoseEstimator(
-        Constants.Swerve.swerveKinematics, 
-        s_Swerve.getYaw(), 
-        s_Swerve.getModulePositions(), 
-        new Pose2d(),
-        stateStdDevs,
-        visionMeasurementStdDevs);
-    }
-  
   @Override
-  public void periodic(){
-    //update pose estimator
-    if(camera != null){
-    var piplelineResult = camera.getLatestResult();
-    SmartDashboard.putBoolean("THe Truth", true);
-
-    if(piplelineResult.hasTargets()) {
-    var target = piplelineResult.getBestTarget();
-    var fiducialId = target.getFiducialId();
-
-    //get tag from pose from field layout
-      Optional<Pose3d> tagPose = aprilTagFieldLayout == null ? Optional.empty() : aprilTagFieldLayout.getTagPose(fiducialId);
-
-    if(target.getPoseAmbiguity() <=  .2 && fiducialId >= 0 && tagPose.isPresent()){
-      var targetPose = tagPose.get(); 
+  public void periodic()
+  {
+    lf = camera.getLatestResult();
+    if(lf.hasTargets())
+    {
+      ct = lf.getBestTarget();
+      distance = PhotonUtils.calculateDistanceToTargetMeters(
+        chog, 
+        thog, 
+        cpr, 
+        Units.degreesToRadians(ct.getYaw()));
     }
-  }
-  }
-
   }
 
   public double getYaw()
   {
-    if(targets == null)
+    if(ct != null)
     {
-      return 0.0;
+      return ct.getYaw();
     }
-    else
-    {
-      return targets.get(0).getYaw();
-    }
+    return 0.0;
   }
 
   public double getDistance()
   {
-    if(targets == null)
+    if(ct != null)
     {
-      return 0.0;
+      return distance;
     }
-    else
-    {
-      return range;
-    }
+    return 0.0;
   }
+
+  
 }
