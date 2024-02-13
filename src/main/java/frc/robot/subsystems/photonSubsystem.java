@@ -85,8 +85,9 @@ public class photonSubsystem extends SubsystemBase{
   @Override
   public void periodic(){
     //update pose estimator
-    
+    if(camera != null){
     var piplelineResult = camera.getLatestResult();
+    SmartDashboard.putBoolean("THe Truth", true);
 
     if(piplelineResult.hasTargets()) {
     var target = piplelineResult.getBestTarget();
@@ -98,6 +99,7 @@ public class photonSubsystem extends SubsystemBase{
     if(target.getPoseAmbiguity() <=  .2 && fiducialId >= 0 && tagPose.isPresent()){
       var targetPose = tagPose.get(); 
     }
+  }
   }
 
   }

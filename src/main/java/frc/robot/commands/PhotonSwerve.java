@@ -60,7 +60,7 @@ public class PhotonSwerve extends Command{
     @Override 
     public void execute()
     {
-        s_Swerve.drive(translation, currentAngle, false,false);
+        s_Swerve.drive(translation, 0, false,false);
         currentAngle = currentAngle - camera.getYaw();
         currentPosition = camera.getDistance();
         translation = new Translation2d(currentPosition, new Rotation2d(Units.degreesToRadians(currentAngle)));
