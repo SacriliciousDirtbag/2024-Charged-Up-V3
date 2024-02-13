@@ -82,5 +82,12 @@ public class photonSubsystem extends SubsystemBase{
     return 0.0;
   }
 
-  
+  public double GXP()
+  {
+    if(ct != null)
+    {
+      return ct.getBestCameraToTarget().getX();
+    }
+    return 0;
+  }
 }

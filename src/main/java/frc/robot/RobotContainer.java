@@ -309,7 +309,7 @@ public class RobotContainer {
         //accumulatorIn.onTrue(new InstantCommand(() -> CentralCommand.getAsBooleanFalse()));
         //accumulatorOut.onTrue(new InstantCommand(() -> CentralCommand.getAsBooleanTrue()));
         
-        zeroGyro.onTrue(new InstantCommand(() -> s_Swerve.zeroGyro()));
+        //zeroGyro.onTrue(new InstantCommand(() -> s_Swerve.zeroGyro()));
 
        //elevatorUpButton.onTrue(new InstantCommand(() -> s_ElevatorSubsystem.raiseArm()));
 

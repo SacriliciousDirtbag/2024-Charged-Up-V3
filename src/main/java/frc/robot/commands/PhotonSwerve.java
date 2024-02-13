@@ -32,6 +32,7 @@ public class PhotonSwerve extends Command{
 
     double currentPosition;
     double currentAngle;
+    double cyp;
     Swerve s_Swerve;
     Translation2d translation; 
 
@@ -53,17 +54,21 @@ public class PhotonSwerve extends Command{
         // movementController.setSetpoint(0);
         // movementController.setTolerance(0.5);
         currentAngle = camera.getYaw();
+        cyp = camera.GXP();
         currentPosition = camera.getDistance();
-        translation = new Translation2d(-currentPosition, new Rotation2d(Units.degreesToRadians(currentAngle)));
+        translation = new Translation2d(currentPosition, cyp);
+        //new Rotation2d(Units.degreesToRadians(currentAngle)));
     }
 
     @Override 
     public void execute()
     {
-        s_Swerve.drive(translation, 0, false,false);
-        currentAngle = currentAngle - camera.getYaw();
+        s_Swerve.drive(translation, currentAngle, false,false);
+        currentAngle -= camera.getYaw();
+        cyp = camera.GXP();
         currentPosition = camera.getDistance();
-        translation = new Translation2d(-currentPosition, new Rotation2d(Units.degreesToRadians(currentAngle)));
+        translation = new Translation2d(currentPosition,cyp);
+        // new Rotation2d(Units.degreesToRadians(currentAngle)));
     
         // currentAngle = -1 * (currentAngle - camera.getYaw());                                               
         // currentPosition = camera.getDistance();
@@ -85,24 +90,24 @@ public class PhotonSwerve extends Command{
         // }
     }
 
-    // @Override
-    // public void end(boolean isTrue)
-    // {
-    //     SwerveModuleState stop = new SwerveModuleState();
+    @Override
+    public void end(boolean isTrue)
+    {
+        SwerveModuleState stop = new SwerveModuleState();
 
-    //     for(SwerveModule i : swerveModules)
-    //     {
-    //         i.setDesiredState(stop, false);
-    //     }
-    // }
+        for(SwerveModule i : swerveModules)
+        {
+            i.setDesiredState(stop, false);
+        }
+    }
 
-    // @Override
-    // public boolean isFinished()
-    // {
-    //     // if(movementController.atSetpoint() && currentAngle < -0.5 && currentAngle > 0.5)
-    //     // {
-    //     //     return true;
-    //     // }
-    //     // return false;
-    // }
+    @Override
+    public boolean isFinished()
+    {
+        if(currentPosition < 0.5 && currentAngle < -0.5 && currentAngle > 0.5)
+        {
+             return true;
+        }
+        return false;
+    }
 }
