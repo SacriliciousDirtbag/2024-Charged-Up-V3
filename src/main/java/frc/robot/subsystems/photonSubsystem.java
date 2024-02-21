@@ -61,6 +61,11 @@ public class photonSubsystem extends SubsystemBase{
         thog, 
         cpr, 
         Units.degreesToRadians(ct.getYaw()));
+        pti = ct.getBestCameraToTarget();
+        SmartDashboard.putNumber("z", pti.getZ());
+        SmartDashboard.putNumber("x", pti.getX());
+        SmartDashboard.putNumber("y", pti.getY());
+        
     }
   }
 
@@ -89,5 +94,10 @@ public class photonSubsystem extends SubsystemBase{
       return ct.getBestCameraToTarget().getX();
     }
     return 0;
+  }
+
+  public Transform3d getTransform3d()
+  {
+    return ct.getBestCameraToTarget();
   }
 }
