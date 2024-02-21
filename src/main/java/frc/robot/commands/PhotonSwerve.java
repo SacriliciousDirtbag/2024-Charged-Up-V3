@@ -11,14 +11,17 @@ import frc.robot.Constants;
 import frc.robot.SwerveModule;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ProfiledPIDCommand;
 import edu.wpi.first.math.geometry.Transform3d;
 
 import frc.robot.subsystems.Swerve;
@@ -29,8 +32,10 @@ public class PhotonSwerve extends Command{
     photonSubsystem camera;
     Swerve s_Swerve;
 
+    TrapezoidProfile.Constraints theataTrap = new TrapezoidProfile.Constraints(Constants.AutoConstants.kMaxAngularSpeedRadiansPerSecond, Constants.AutoConstants.kMaxAngularSpeedRadiansPerSecond);
+    ProfiledPIDController theataPidController = new ProfiledPIDController(Constants.AutoConstants.kPThetaController, 0, 0, theataTrap);
     PIDController xPidController = new PIDController(Constants.AutoConstants.kPXController, 0, 0);
-    PIDController theataPidController = new PIDController(Constants.AutoConstants.kPYController, 0, 0);
+    //PIDController theataPidController = new PIDController(Constants.AutoConstants.kPYController, 0, 0);
     PIDController yPidController = new PIDController(Constants.AutoConstants.kPThetaController, 0, 0);
     Transform3d currentTransform3d;
     ChassisSpeeds chassisSpeeds;
@@ -47,31 +52,30 @@ public class PhotonSwerve extends Command{
         this.camera = camera;
         this.s_Swerve = s_Swerve;
 
-        xPidController.setTolerance(0.05);
-        yPidController.setTolerance(0.05);
+        xPidController.setTolerance(0.1);
+        yPidController.setTolerance(0.1);
         theataPidController.enableContinuousInput(-Math.PI, Math.PI);
-        theataPidController.setTolerance(Units.degreesToRadians(3));
+        theataPidController.setTolerance(Units.degreesToRadians(1));
     }
 
     @Override
     public void initialize() 
     {
-        theataPidController.setSetpoint(0);
+        theataPidController.reset(s_Swerve.getYaw().getRadians());
+
         xPidController.setSetpoint(1);
         yPidController.setSetpoint(0);
         s_Swerve.zeroGyro();
+        theataPidController.setGoal(0);
+        angle = Units.degreesToRadians(camera.getYaw());
     }
 
     @Override 
     public void execute()
     {
-        currentTransform3d = camera.getTransform3d();
-        SmartDashboard.putNumber("Transform3d", currentTransform3d.getX());
-        //theataCaluclation = -theataPidController.calculate(camera.getYaw());
+        theataCaluclation = -theataPidController.calculate(Units.degreesToRadians(angle - s_Swerve.getYaw().getRadians()));
         xCalculation = -xPidController.calculate(currentTransform3d.getX());
-        yCalculation = -yPidController.calculate(currentTransform3d.getY());
-        theataCaluclation = 0; 
-
+        yCalculation = -yPidController.calculate(currentTransform3d.getY()); 
         chassisSpeeds = new ChassisSpeeds(xCalculation,yCalculation,theataCaluclation);
         swerveModuleStates = Constants.Swerve.swerveKinematics.toSwerveModuleStates(chassisSpeeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(swerveModuleStates, Constants.AutoConstants.kMaxSpeedMetersPerSecond);
@@ -100,10 +104,10 @@ public class PhotonSwerve extends Command{
         {
             xPidController.reset();
         }
-        if(theataPidController.atSetpoint())
-        {
-            theataPidController.reset();
-        }
+        // if(theataPidController.atSetpoint())
+        // {
+        //     theataPidController.reset();
+        // }
         return false;
     }
 }

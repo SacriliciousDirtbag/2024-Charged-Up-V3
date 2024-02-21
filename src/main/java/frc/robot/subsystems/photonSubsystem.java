@@ -65,6 +65,7 @@ public class photonSubsystem extends SubsystemBase{
         SmartDashboard.putNumber("z", pti.getZ());
         SmartDashboard.putNumber("x", pti.getX());
         SmartDashboard.putNumber("y", pti.getY());
+        SmartDashboard.putNumber("THEBIGANGLE", ct.getYaw());
         
     }
   }
