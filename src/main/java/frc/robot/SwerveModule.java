@@ -5,6 +5,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import frc.lib.math.Conversions;
 import frc.lib.util.CTREModuleState;
 import frc.lib.util.SwerveModuleConstants;
@@ -12,17 +13,34 @@ import frc.lib.util.SwerveModuleConstants;
 import com.ctre.phoenix.ErrorCode;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
-import com.ctre.phoenix.motorcontrol.can.TalonFX;
-import com.ctre.phoenix.sensors.CANCoder;
+import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.revrobotics.AbsoluteEncoder;
+import com.revrobotics.CANSparkFlex;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.SparkAbsoluteEncoder;
+import frc.lib.util.CanCoderAbsoluteConfiguration;
+import com.revrobotics.SparkPIDController;
+import com.revrobotics.CANSparkLowLevel.MotorType;
+
+// import frc.lib.util.CANCoderUtil; TODO: imports don't work
+// import frc.lib.util.CANCoderUtil.CCUsage;
+
 
 public class SwerveModule {
     public int moduleNumber;
     private Rotation2d angleOffset;
     private Rotation2d lastAngle;
 
-    private TalonFX mAngleMotor;
-    private TalonFX mDriveMotor;
-    private CANCoder angleEncoder;
+    private CANSparkFlex mAngleMotor;
+    private CANSparkFlex mDriveMotor;
+    
+    private RelativeEncoder driveEncoder;
+    private RelativeEncoder integratedAngleEncoder;
+    private CANcoder angleEncoder;
+
+    private final SparkPIDController driveController;
+    private final SparkPIDController angleController;
 
     public double CANcoderInitTime = 0.0;
 
@@ -35,19 +53,23 @@ public class SwerveModule {
         /* Angle Encoder Config */ 
         
         /* -- designating a canbus explicitly states where the motor controller is passing from, default seems to be roborio -- */
-        angleEncoder = new CANCoder(moduleConstants.cancoderID, "1056_Canivore");
+        angleEncoder = new CANcoder(moduleConstants.cancoderID);
         configAngleEncoder();
         configAngleEncoder();
         configAngleEncoder();
 
         /* Angle Motor Config */ 
-        mAngleMotor = new TalonFX(moduleConstants.angleMotorID, "1056_Canivore");
+        mAngleMotor = new CANSparkFlex(moduleConstants.angleMotorID, MotorType.kBrushless);
+        integratedAngleEncoder = mAngleMotor.getEncoder();
+        angleController = mAngleMotor.getPIDController();
         configAngleMotor();
         configAngleMotor();
         configAngleMotor();
 
         /* Drive Motor Config */
-        mDriveMotor = new TalonFX(moduleConstants.driveMotorID, "1056_Canivore");
+        mDriveMotor = new CANSparkFlex(moduleConstants.driveMotorID, MotorType.kBrushless);
+        driveEncoder = mDriveMotor.getEncoder();
+        driveController = mDriveMotor.getPIDController();
         configDriveMotor();
         configDriveMotor();
         configDriveMotor();
@@ -62,60 +84,62 @@ public class SwerveModule {
         setSpeed(desiredState, isOpenLoop);
     }
 
-    private void setSpeed(SwerveModuleState desiredState, boolean isOpenLoop){
-        if(isOpenLoop){
-            double percentOutput = desiredState.speedMetersPerSecond / Constants.Swerve.maxSpeed;
-            mDriveMotor.set(ControlMode.PercentOutput, percentOutput);
+    private void setSpeed(SwerveModuleState desiredState, boolean isOpenLoop) {
+        if (isOpenLoop) {
+          double percentOutput = desiredState.speedMetersPerSecond / Constants.Swerve.maxSpeed;
+          mDriveMotor.set(percentOutput);
+        } else {
+          driveController.setReference(CANcoderInitTime, CANSparkFlex.ControlType.kVelocity);
         }
-        else {
-            double velocity = Conversions.MPSToFalcon(desiredState.speedMetersPerSecond, Constants.Swerve.wheelCircumference, Constants.Swerve.driveGearRatio);
-            mDriveMotor.set(ControlMode.Velocity, velocity, DemandType.ArbitraryFeedForward, feedforward.calculate(desiredState.speedMetersPerSecond));
-        }
-    }
+      }
 
-    private void setAngle(SwerveModuleState desiredState){
-        Rotation2d angle = (Math.abs(desiredState.speedMetersPerSecond) <= (Constants.Swerve.maxSpeed * 0.01)) ? lastAngle : desiredState.angle; //Prevent rotating module if speed is less then 1%. Prevents Jittering.
-        
-        mAngleMotor.set(ControlMode.Position, Conversions.degreesToFalcon(angle.getDegrees(), Constants.Swerve.angleGearRatio));
+      private void setAngle(SwerveModuleState desiredState) {
+        // Prevent rotating module if speed is less then 1%. Prevents jittering.
+        Rotation2d angle =
+            (Math.abs(desiredState.speedMetersPerSecond) <= (Constants.Swerve.maxSpeed * 0.01))
+                ? lastAngle
+                : desiredState.angle;
+    
+        angleController.setReference(angle.getDegrees(), CANSparkFlex.ControlType.kPosition);
         lastAngle = angle;
-    }
+      }
 
     private Rotation2d getAngle(){
-        return Rotation2d.fromDegrees(Conversions.falconToDegrees(mAngleMotor.getSelectedSensorPosition(), Constants.Swerve.angleGearRatio));
+        return Rotation2d.fromDegrees(integratedAngleEncoder.getPosition());
     }
 
     public Rotation2d getCanCoder(){
-        return Rotation2d.fromDegrees(angleEncoder.getAbsolutePosition());
+        return Rotation2d.fromDegrees(angleEncoder.getAbsolutePosition().getValueAsDouble());
     }
 
-    private void waitForCanCoder(){
-        /*
-         * Wait for up to 1000 ms for a good CANcoder signal.
-         *
-         * This prevents a race condition during program startup
-         * where we try to synchronize the Falcon encoder to the
-         * CANcoder before we have received any position signal
-         * from the CANcoder.
-         */
-        for (int i = 0; i < 100; ++i) {
-            angleEncoder.getAbsolutePosition();
-            if (angleEncoder.getLastError() == ErrorCode.OK) {
-                break;
-            }
-            Timer.delay(0.010);            
-            CANcoderInitTime += 10;
-        }
-    }
+    // private void waitForCanCoder(){
+    //     /*
+    //      * Wait for up to 1000 ms for a good CANcoder signal.
+    //      *
+    //      * This prevents a race condition during program startup
+    //      * where we try to synchronize the Falcon encoder to the
+    //      * CANcoder before we have received any position signal
+    //      * from the CANcoder.
+    //      */
+    //     for (int i = 0; i < 100; ++i) {
+    //         angleEncoder.getAbsolutePosition();
+    //         if (angleEncoder.getlast() == ErrorCode.OK) {
+    //             break;
+    //         }
+    //         Timer.delay(0.010);            
+    //         CANcoderInitTime += 10;
+    //     }
+    // }
 
     public void resetToAbsolute(){
-        waitForCanCoder();
-
-        double absolutePosition = Conversions.degreesToFalcon(getCanCoder().getDegrees() - angleOffset.getDegrees(), Constants.Swerve.angleGearRatio);
-        mAngleMotor.setSelectedSensorPosition(absolutePosition);
+        // waitForCanCoder();
+        double absolutePosition = getCanCoder().getDegrees() - angleOffset.getDegrees();
+        integratedAngleEncoder.setPosition(absolutePosition);
     }
 
     private void configAngleEncoder(){        
         angleEncoder.configFactoryDefault();
+        cancoderutil.setCANCoderBusUsage(angleEncoder, CCUsage.kMinimal);
         angleEncoder.configAllSettings(Robot.ctreConfigs.swerveCanCoderConfig);
     }
 

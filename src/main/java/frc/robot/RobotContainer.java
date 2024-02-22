@@ -171,8 +171,6 @@ public class RobotContainer {
         // Configure the button bindings
         configureButtonBindings();
 
-        m_Chooser.addOption("Right Auto", m_rightCommand);
-
         SmartDashboard.putData(m_Chooser);
     }
         
