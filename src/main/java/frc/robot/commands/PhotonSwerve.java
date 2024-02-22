@@ -3,6 +3,7 @@ package frc.robot.commands;
 import java.util.ArrayList;
 
 import org.photonvision.PhotonCamera;
+import org.photonvision.PhotonUtils;
 
 import com.ctre.phoenix6.sim.ChassisReference;
 import com.fasterxml.jackson.core.TreeNode;
@@ -67,13 +68,19 @@ public class PhotonSwerve extends Command{
         yPidController.setSetpoint(0);
         s_Swerve.zeroGyro();
         theataPidController.setGoal(0);
-        angle = Units.degreesToRadians(camera.getYaw());
     }
 
     @Override 
     public void execute()
     {
-        theataCaluclation = -theataPidController.calculate(Units.degreesToRadians(angle - s_Swerve.getYaw().getRadians()));
+        currentTransform3d = camera.getTransform3d();
+        angle = camera.getYaw(); 
+        theataCaluclation = -theataPidController.calculate(s_Swerve.gyro.getYaw()  % 360- angle); //Units.degreesToRadians(angle - s_Swerve.getYaw().getDegrees())
+        //if camera > gyro
+        if((Math.abs(s_Swerve.gyro.getYaw()) - Math.abs(angle)) < 0){ //Added Math.abs to both so neither are impacted by negatives
+            theataCaluclation = -theataPidController.calculate(-(s_Swerve.gyro.getYaw() % 360 - angle));
+        }
+
         xCalculation = -xPidController.calculate(currentTransform3d.getX());
         yCalculation = -yPidController.calculate(currentTransform3d.getY()); 
         chassisSpeeds = new ChassisSpeeds(xCalculation,yCalculation,theataCaluclation);
