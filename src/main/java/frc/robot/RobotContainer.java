@@ -26,13 +26,9 @@ import frc.robot.commands.*;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import frc.robot.subsystems.ElevatorSubsystem;
-import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.Swerve;
-import frc.robot.subsystems.cameraSubsystem;
 import frc.robot.subsystems.photonSubsystem;
 import frc.robot.subsystems.LEDSubsystem;
-import frc.robot.subsystems.cameraSubsystem;
 
 
 /**
@@ -128,38 +124,17 @@ public class RobotContainer {
     private final JoystickButton TOP_GREEN = new JoystickButton(buttonBoard, 7); //TOP GREEN
     private final JoystickButton BOTTOM_GREEN = new JoystickButton(buttonBoard, 9); //BOTTOM GREEN
     
-    /*
-    //INTAKE
-    private final JoystickButton accumulatorOut = new JoystickButton(buttonBoard2, 5);
-    private final JoystickButton accumulatorIn = new JoystickButton(buttonBoard2, 3);
-
-    //INTAKE
-    private final JoystickButton flipOut = new JoystickButton(buttonBoard2, 7);
-    private final JoystickButton flipIn = new JoystickButton(buttonBoard2, 8);
-
-    //WHEELS
-    private final JoystickButton wheelForward = new JoystickButton(buttonBoard2, 2);
-    private final JoystickButton wheelReverse = new JoystickButton(buttonBoard2, 1);
-
-    //ELEVATOR
-    private final JoystickButton elevatorUpButton = new JoystickButton(buttonBoard2, 6);
-    private final JoystickButton elevatorDownButton = new JoystickButton(buttonBoard2, 4);
-    */
+ 
 
     /* Subsystems & Commands */
     public final Swerve s_Swerve = new Swerve();
-    public final ElevatorSubsystem s_ElevatorSubsystem = new ElevatorSubsystem();
-    public final IntakeSubsystem s_IntakeSubsystem = new IntakeSubsystem();
     public final LEDSubsystem s_lightSubsystem = new LEDSubsystem();
 
     //PHOTON
     public final photonSubsystem s_PhotonSubsystem = new photonSubsystem(); //TODO: Finish
 
     public final Command m_leftCommand = new left(s_Swerve);
-    public final Command m_middleCommand = new middle(s_Swerve);
-    public final Command m_rightCommand = new right(s_Swerve);
-    public final SequentialCommandGroup m_ballAuto = new swerveDriveDrive(s_Swerve, s_ElevatorSubsystem, s_IntakeSubsystem);
-    
+    public final Command m_middleCommand = new middle(s_Swerve);    
 
  //PHOTON COMMAND
     PIDController phController = new PIDController(Constants.AutoConstants.kPXController, Constants.AutoConstants.kPYController, Constants.AutoConstants.kPThetaController);
@@ -167,97 +142,17 @@ public class RobotContainer {
 
     
     public final Command s_AutoBalance = new NewAutoBalance(s_Swerve);
-    public final Command s_Test = new Test(s_Swerve, Constants.autoConfigs.route1Locations, Constants.autoConfigs.route1EndLocation);
     public final Command s_Pose2dMovement = new Pose2dMovement(s_Swerve, new Translation2d(2,0), 180, true, false);
 
-    public final Command s_HighCubeOnly = new SequentialCommandGroup(  //High Plan B
-        new HighCubeAuto(s_IntakeSubsystem, s_ElevatorSubsystem)
-    );
-
-    public final Command s_aprilTag = new SequentialCommandGroup(
-        new RunCommand(()-> s_Swerve.drive(new Translation2d(cameraSubsystem.getZVal() - 1.5, 0), 0, false, false), s_Swerve)
-    );
 
    
     public final PhotonSwerve m_photonCommand = new PhotonSwerve(s_PhotonSubsystem, s_Swerve);
 
 
-    public final IntakeCone s_IntakeCone = new IntakeCone(s_ElevatorSubsystem, s_IntakeSubsystem);
-    public final IntakeCube s_IntakeCube = new IntakeCube(s_ElevatorSubsystem, s_IntakeSubsystem);
-    public final RampCone s_RampCone = new RampCone(s_ElevatorSubsystem, s_IntakeSubsystem);
-    public final RampCube s_RampCube = new RampCube(s_ElevatorSubsystem, s_IntakeSubsystem);
-    public final ScoreConeHigh s_ScoreConeHigh = new ScoreConeHigh(s_ElevatorSubsystem, s_IntakeSubsystem);
-    public final ScoreConeLow s_ScoreConeLow = new ScoreConeLow(s_ElevatorSubsystem, s_IntakeSubsystem);
-    public final ScoreCubeHigh s_ScoreCubeHigh = new ScoreCubeHigh(s_ElevatorSubsystem, s_IntakeSubsystem);
-    public final ScoreCubeLow s_ScoreCubeLow = new ScoreCubeLow(s_ElevatorSubsystem, s_IntakeSubsystem);
-
-    public final IntakeReset s_IntakeReset = new IntakeReset(s_ElevatorSubsystem, s_IntakeSubsystem);
-
 
     //NEW CHOREO AUTO
     public final Command s_swerveMovement = new SequentialCommandGroup(
         new choreoTest(s_Swerve)
-    );
-
-     //UPDATED 2023 AUTO
-     public final Command s_NewAutoPickup = new SequentialCommandGroup(
-
-        //initial load scoring, get to intake position
-        new InstantCommand(() -> s_ScoreCubeHigh.initialize()),
-        new Delay(2.5),
-
-        //score, then reset wheels
-        new InstantCommand(() -> s_IntakeSubsystem.wheelReverse()),
-        
-        //After delay, Get near 2nd cube
-        new Delay(2),
-        new InstantCommand(() -> s_IntakeReset.initialize()),
-        
-        // (new InstantCommand(() -> s_IntakeSubsystem.resetAll())),
-        new Test(s_Swerve, Constants.autoConfigs.backupLocations, Constants.autoConfigs.backupEndLocation),
-        new Test(s_Swerve, Constants.autoConfigs.route1Locations, Constants.autoConfigs.route1EndLocation),
-        
-
-        
-        
-        // //Intake out, wheel foward towards cube
-        new InstantCommand(() -> s_IntakeSubsystem.wheelForward()),
-        new InstantCommand(() -> s_IntakeCube.initialize()),
-        
-        //drive foward to pickup
-        new Delay(2),
-        new Test(s_Swerve, Constants.autoConfigs.pickupcubeLocations, Constants.autoConfigs.pickupcubeLocation),
-        new InstantCommand(() -> s_IntakeReset.initialize()),
-        new InstantCommand(() -> s_IntakeSubsystem.resetAll()),
-
-        //head to balance
-        new Test(s_Swerve, Constants.autoConfigs.route3Locations, Constants.autoConfigs.route3EndLocation),
-
-        new AutoBalance(),
-
-        new autoTurn()
-
-
-        //return and score, reset wheels
-        //new Test(s_Swerve, Constants.autoConfigs.route2Locations, Constants.autoConfigs.route2EndLocation),
-        // new InstantCommand(() -> s_IntakeSubsystem.resetAll()), //reset intake wheel
-        // new InstantCommand(() -> s_HighCubeOnly.initialize()),
-        // new Delay(2),
-        // new InstantCommand(() -> s_IntakeSubsystem.wheelReverse()),
-        // new Delay(1),
-        // new InstantCommand(() -> s_IntakeSubsystem.resetAll())
-        
-        
-        
-        //new RunCommand(() -> s_Test.initialize())
-        //new HighCubeAuto(s_IntakeSubsystem, s_ElevatorSubsystem), 
-        //new middle(s_Swerve),
-        // new RunCommand(()-> s_IntakeCone.initialize(), s_Swerve), 
-
-        //scores, moves back, then shifts right, pickup, shift left
-
-
-    
     );
 
 
@@ -277,16 +172,6 @@ public class RobotContainer {
         configureButtonBindings();
 
         m_Chooser.addOption("Right Auto", m_rightCommand);
-        m_Chooser.addOption("Middle Auto", m_middleCommand);
-        m_Chooser.addOption("Left Auto", m_leftCommand);
-        m_Chooser.setDefaultOption("High Cube Auto", m_ballAuto);
-        m_Chooser.addOption("High Plan B", s_HighCubeOnly);
-        m_Chooser.addOption("New Auto Balance", s_AutoBalance);
-        m_Chooser.addOption("April Tags", s_aprilTag);
-        m_Chooser.addOption("Parameter Test", s_Test);
-        m_Chooser.addOption("Pickup", s_NewAutoPickup);
-        m_Chooser.addOption("Pose2d Movement", s_Pose2dMovement);
-        m_Chooser.addOption("CHOREO TEST", s_swerveMovement);
 
         SmartDashboard.putData(m_Chooser);
     }
@@ -303,97 +188,7 @@ public class RobotContainer {
         photonToggle.onTrue(m_photonCommand);
         photonToggle.onFalse(new InstantCommand(() -> s_Swerve.drive(new Translation2d(), 0,false, false)));
 
-        //M_ELEVATOR_EXTEND_BUTTON = ()-> driver.getRawButton(3);
-        //M_ELEVATOR_RETRACT_BUTTON = ()-> driver.getRawButton(2);
-
-        //accumulatorIn.onTrue(new InstantCommand(() -> CentralCommand.getAsBooleanFalse()));
-        //accumulatorOut.onTrue(new InstantCommand(() -> CentralCommand.getAsBooleanTrue()));
-        
-        //zeroGyro.onTrue(new InstantCommand(() -> s_Swerve.zeroGyro()));
-
-       //elevatorUpButton.onTrue(new InstantCommand(() -> s_ElevatorSubsystem.raiseArm()));
-
-        /* POSES */
-/* 
-       //RAMP POSE
-        TOP_ORANGE.onTrue(new InstantCommand(() -> s_RampCone.initialize()));
-        //TOP_ORANGE.onFalse(new InstantCommand(() -> s_ElevatorSubsystem.stopExtend()));
-
-        BOTTOM_ORANGE.onTrue(new InstantCommand(() -> s_RampCube.initialize()));
-        //BOTTOM_ORANGE.onFalse(new InstantCommand(() -> s_ElevatorSubsystem.stopExtend()));
-
-        //INTAKE POSE
-        TOP_RED.onTrue(new InstantCommand(() -> s_IntakeCone.initialize())); 
-        //TOP_RED.onFalse(new InstantCommand(() -> s_ElevatorSubsystem.stopArm()));
-        
-        BOTTOM_RED.onTrue(new InstantCommand(() -> s_IntakeCube.initialize())); 
-        //BOTTOM_RED.onFalse(new InstantCommand(() -> s_ElevatorSubsystem.stopArm()));
-
-        //SCORE CONE POSE
-        TOP_BLUE.onTrue(new InstantCommand(() -> s_ScoreConeHigh.initialize())); 
-        //TOP_BLUE.onFalse(new InstantCommand(() -> s_IntakeSubsystem.setTargetPosition()));
-        
-        BOTTOM_BLUE.onTrue(new InstantCommand(() -> s_ScoreConeLow.initialize()));
-        //BOTTOM_BLUE.onFalse(new InstantCommand(() -> s_IntakeSubsystem.setTargetPosition()));
-
-
-        //SCORE CUBE POSE
-        TOP_GREEN.onTrue(new InstantCommand(() -> s_ScoreCubeHigh.initialize()));
-        //TOP_GREEN.onFalse(new InstantCommand(() -> s_IntakeSubsystem.resetAll()));
-        
-        BOTTOM_GREEN.onTrue(new InstantCommand(() -> s_ScoreCubeLow.initialize()));
-        //BOTTOM_GREEN.onFalse(new InstantCommand(() -> s_IntakeSubsystem.resetAll()));
-
-*/
-        /* DRIVER CONTROLS */
-
-
-        //ELEVATOR - MANUAL
-        TOP_ORANGE.onTrue(new InstantCommand(() -> s_ElevatorSubsystem.elevatorUp()));
-        TOP_ORANGE.onFalse(new InstantCommand(() -> s_ElevatorSubsystem.stopElevator()));
-
-        BOTTOM_ORANGE.onTrue(new InstantCommand(() -> s_ElevatorSubsystem.elevatorDown()));
-        BOTTOM_ORANGE.onFalse(new InstantCommand(() -> s_ElevatorSubsystem.stopElevator()));
-
-        //EXTEND, POSE
-        /*TOP_RED.onTrue(new InstantCommand(() -> s_ScoreConeHigh.initialize())); 
-        TOP_RED.onFalse(new InstantCommand(() -> s_ElevatorSubsystem.carriageRetract()));
-        
-        BOTTOM_RED.onTrue(new InstantCommand(() -> s_ScoreConeLow.initialize()));
-        BOTTOM_RED.onFalse(new InstantCommand(() -> s_ElevatorSubsystem.carriageRetract()));
-        */
-        //INTAKE POSES
-        TOP_BLUE.onTrue(new InstantCommand(() -> s_RampCube.initialize())); 
-        TOP_BLUE.onFalse(new InstantCommand(() -> s_IntakeReset.initialize()));
-
-        MIDDLE_BLUE.onTrue(new InstantCommand(() -> s_ScoreCubeHigh.initialize())); 
-        MIDDLE_BLUE.onFalse(new InstantCommand(() -> s_IntakeReset.initialize()));
-        
-        BOTTOM_BLUE.onTrue(new InstantCommand(() -> s_IntakeCube.initialize()));
-        BOTTOM_BLUE.onFalse(new InstantCommand(() -> s_IntakeReset.initialize()));
-
-        //WHEEL SPIN - MANUAL
-        TOP_GREEN.onTrue(new InstantCommand(() -> s_IntakeSubsystem.wheelForward()));
-        TOP_GREEN.onFalse(new InstantCommand(() -> s_IntakeSubsystem.resetAll()));
-        
-        BOTTOM_GREEN.onTrue(new InstantCommand(() -> s_IntakeSubsystem.wheelReverse()));
-        BOTTOM_GREEN.onFalse(new InstantCommand(() -> s_IntakeSubsystem.resetAll()));
-
-        //MISC
-        zeroGyro.onTrue(new InstantCommand(() -> s_Swerve.zeroGyro())); //11
-        safeButton.onTrue(new InstantCommand(() -> s_ElevatorSubsystem.resetAll())); //10
-        //safeButton2.onTrue(new InstantCommand(() -> s_ElevatorSubsystem.resetAll())); //12
-
-
-        //LEDS
-        /*button1.onTrue(new InstantCommand(()-> s_lightSubsystem.lightTest()));
-        button2.onTrue(new InstantCommand(()-> s_lightSubsystem.lightTest2()));
-        button3.onTrue(new InstantCommand(()-> s_lightSubsystem.lightTest3()));
-        button4.onTrue(new InstantCommand(()-> s_lightSubsystem.lightTest4()));
-        button5.onTrue(new InstantCommand(()-> s_lightSubsystem.lightTest5()));
-        button6.onTrue(new InstantCommand(()-> s_lightSubsystem.lightTest6()));
-        button7.onTrue(new InstantCommand(()-> s_lightSubsystem.lightTest7()));
-        button8.onTrue(new InstantCommand(()-> s_lightSubsystem.lightTest8()));*/
+   
     }
 
     /**
@@ -416,9 +211,5 @@ public class RobotContainer {
 
     public Command getTurnCommand(){
         return new autoTurn();
-    }
-
-    public Command getShooterCommand(){
-        return new shooter();
     }
 }
